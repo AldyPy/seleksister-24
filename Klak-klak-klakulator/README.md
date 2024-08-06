@@ -1,3 +1,8 @@
+#TODO:
+1. Make exponent flexible.
+2. Make sqrt(-1) throw syntax error.
+3. Clean up code.
+
 # Klakulator
 *"To reinvent the world, one wheel at a time..."*
 
@@ -5,7 +10,7 @@
 A simple calculator that implements addition `+`, subtraction `-`, multiplication `*`, division `/`, integer exponents `^`, as well as thesquare root `sqrt()` calculations, purely using bitwise operators, array functions, and string functions. There are also no for loops or while loops. The main idea of the implementation is to represent any real number as two arrays of single digit numbers: the whole part, and the fractional part.
 
 ## How To Run
-Make sure your in the `Klak-klak-klakulator` folder, then just run with Perl:
+Make sure you're in the `Klak-klak-klakulator` folder, then just run with Perl:
 
 ```
 perl main.pl
@@ -95,7 +100,9 @@ I have to allow *this* :
 1.0
 ```
 
-The actual result is `1.000000009`. That is a difference of less than `10e-7` which is less than a `0.000000000001%` error with respect to the original operands' magnitudes. Unless this calculator is going to be used for intergalactic space travel, I think you can trust it.
+The actual result is `1.000000009`. That is a difference of less than `10e-7` which is less than a `0.000000000001%` error with respect to the original operands' magnitudes. Unless this calculator is going to be used for intergalactic space travel, I'd say you can trust it.
+
+3. I have never used Perl before. The code is quite.. unreadable.
 
 ## Author
 
