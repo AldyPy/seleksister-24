@@ -20,13 +20,13 @@ perl main.pl
 
 1. Operations are always executed from left to right, regardless of operator.
 ```
->>> 1 / 1 + 1
-2.0
+>>> 1 + 2 * 3
+9.0
 ```
 2. Of course, you can use parentheses to determine the order of operations if you want.
 ```
->>> 1 / (1 + 1)
-0.5
+>>> 1 + (2 * 3)
+7.0
 ```
 3. As stated in the "about" section, exponents and square roots are available operators. As you can expect, for exponents, the syntax is the same as the four basic operators. For `sqrt`, you have to place parentheses for the expression you would like to take the square root of.
 ```
