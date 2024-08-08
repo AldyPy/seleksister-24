@@ -58,16 +58,22 @@ perl main.pl
 [SYNTAX ERROR]
 ```
 
-6. Exponential expressions will throw a syntax error if the amount of significant figures exceeds 50 (in other words: if the result is absurdly large or small).
+6. Exponential expressions will throw a syntax error if the amount of significant figures exceeds 50 (in other words: if the result gets too large or small). However, an exception is made for numbers whose absolute value is smaller than 2. (This is to support calculation of long term percentage-based changes, like in the fourth example below. In these cases, the result is constantly truncated when calculating, which means it will not be 100% accurate, though it is still a decent approximation. Please keep in mind, the calculation times might be exceedingly long depending on the magnitude of your input).
 ```
 >>> 99999999999999 ^ 9999999999
 [SYNTAX ERROR]
 
->>> 2 ^ (-2024)
+>>> 50.31 ^ 16
+1684492482679363054407383101.730761611187009
+
+>>> 2 ^ 256
 [SYNTAX ERROR]
 
->>> 2 ^ 99
-633825300114114700748351602688.0
+>>> 2 ^ 255
+57896044618658097711785492504343953926634992332820282019728792003956564819968.0
+
+>>> 1.05 ^ 365
+54211841.57783942532828282993300159746085844257730256
 
 ````
 

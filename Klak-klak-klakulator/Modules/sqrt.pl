@@ -12,6 +12,7 @@ sub _sqrt
 # the process is similar with division
 {
     my $N = shift ;
+    if ($N->{sign}) { die }
     $N->clean() ;
 
     # approx 1/sqrt(x) for each x in the range [1..10]

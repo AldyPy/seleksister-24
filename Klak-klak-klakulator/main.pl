@@ -202,6 +202,8 @@ mainloop :
                 $i = _inc($i) ;
                 goto inp ;
             }
+        
+        if (scalar(@stack)) { die }
         $result = evaluate($current_expr) ;
         
         outputs:
@@ -221,7 +223,7 @@ mainloop :
 
     if ($@) 
     { 
-        print ($@) ;
+        # print ($@) ;
         print "${Red}[SYNTAX ERROR]\n\n${reset}"
     }
 

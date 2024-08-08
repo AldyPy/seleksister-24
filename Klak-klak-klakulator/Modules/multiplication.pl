@@ -59,10 +59,8 @@ sub multiply
     my $power2 = scalar(@{$N2->{frac}})  ;
 
     $N1 = mul_power_of_10($N1, $power1) ;
-    $N2 = mul_power_of_10($N2, $power2) ;
-    # if ($N1 != $N2) 
-    # { 
-    # }
+    if ($N1 != $N2)
+        { $N2 = mul_power_of_10($N2, $power2) }
 
     my @arr = () ;
     my @N1_digits = @{$N1->{whole}}  ;
@@ -121,7 +119,8 @@ sub multiply
 
     # reset objects so they be can reused outside the function
     $N1 = mul_power_of_10($N1, _neg_int($power1));
-    $N2 = mul_power_of_10($N2, _neg_int($power2));
+    if ($N1 != $N2)
+        { $N2 = mul_power_of_10($N2, _neg_int($power2)) }
 
     $result = mul_power_of_10($result, _neg_int(_add_int($power1, $power2))) ;
     $result->{sign} = $sign ;
