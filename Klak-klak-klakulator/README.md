@@ -20,18 +20,19 @@ perl main.pl
 
 1. Operations are always executed from left to right, regardless of operator.
 ```
->>> 2 + 1 / 1
-3.0
+>>> 1 / 1 + 1
+2.0
 ```
 2. Of course, you can use parentheses to determine the order of operations if you want.
 ```
->>> 2 + (1 / 1)
-1.0
+>>> 1 / (1 + 1)
+0.5
 ```
-3. As stated in the "above" section, exponents and square roots are available operators. As you can expect, for exponents, the syntax is the same as the four basic operators. For `sqrt`, you have to place parentheses for the expression you would like to take the square root of.
+3. As stated in the "about" section, exponents and square roots are available operators. As you can expect, for exponents, the syntax is the same as the four basic operators. For `sqrt`, you have to place parentheses for the expression you would like to take the square root of.
 ```
 >>> 2 ^ (-1)
 0.5
+
 >>> -1 / sqrt(16)
 -0.25
 ```
@@ -40,6 +41,7 @@ perl main.pl
 ```
 >>> -1 + 2
 1.0
+
 >>>   -  1+  2
 1.0
 ```
@@ -56,12 +58,12 @@ perl main.pl
 [SYNTAX ERROR]
 ```
 
-6. Exponential expressions will throw a syntax error if the result is extremely large.
+6. Exponential expressions will throw a syntax error if the amount of significant figures exceeds 50 (in other words: if the result is absurdly large or small).
 ```
 >>> 99999999999999 ^ 9999999999
 [SYNTAX ERROR]
 
->>> 2 ^ 100
+>>> 2 ^ (-2024)
 [SYNTAX ERROR]
 
 >>> 2 ^ 99
@@ -85,7 +87,7 @@ perl main.pl
 1. The program is slow when performing division and `sqrt`. It may take more than a few hundred miliseconds or even a few seconds for a long expression. This is probably just a `skill issue`, but I wouldn't say it's *that* bad.
 2. There may or may not be a few funny results. Basically, I use Newton's method to perform division and sqrt and while the result is only slightly off, it has to be aggresively rounded in order for integer operations to make sense. 
 
-In other words, to make *this* possible :
+To put it simply, in order to make *this* possible :
 ```
 >>> sqrt((5 ^ 2) + (12 ^ 2))
 13.0
@@ -94,15 +96,15 @@ In other words, to make *this* possible :
 14.0
 ```
 
-I have to allow *this* :
+I had to allow *this* :
 ```
 >>> 1000000000 / 999999991
 1.0
 ```
 
-The actual result is `1.000000009`. That is a difference of less than `10e-7` which is less than a `0.000000000001%` error with respect to the original operands' magnitudes. Unless this calculator is going to be used for intergalactic space travel, I'd say you can trust it.
+Note that the actual result is `1.000000009`. That is a difference of less than `10e-7` which is less than a `0.000000000001%` error with respect to the original operands' magnitudes. Unless this calculator is going to be used for intergalactic space travel, I'd say you can trust it.
 
-3. I have never used Perl before. The code is quite.. unreadable.
+3. I have never used Perl before so the code is quite unreadable.
 
 ## Author
 
