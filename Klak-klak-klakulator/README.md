@@ -1,8 +1,3 @@
-#TODO:
-1. Make exponent flexible.
-2. Make sqrt(-1) throw syntax error.
-3. Clean up code.
-
 # Klakulator
 *"To reinvent the world, one wheel at a time..."*
 
