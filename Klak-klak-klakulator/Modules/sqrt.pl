@@ -12,6 +12,7 @@ sub _sqrt
 # the process is similar with division
 {
     my $N = shift ;
+    if ($N->to_str() eq '0.0') { return Number->new('0.0') }
     if ($N->{sign}) { die }
     $N->clean() ;
 
@@ -55,7 +56,9 @@ sub _sqrt
             }
 
     # Initial 'guess'
-    my $idx = $N->{whole}->[-1]  ;
+    my $idx = pop(@{$N->{whole}})  ;
+    if (!defined $idx) { $idx = 0 }
+    else { push @{$N->{whole}}, $idx }
     my $x = Number->new($approx_invsq[$idx]);
 
     # Newton x5
