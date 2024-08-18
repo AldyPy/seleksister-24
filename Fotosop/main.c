@@ -40,7 +40,7 @@ int main()
     {
         char buffer[1024];
         clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL);
-        printf("Platform %d: %s\n", i, buffer);
+        printf("Platform %d: %s\n", i+1, buffer);
 
         // Get the number of devices for this platform
         cl_uint deviceCount;
@@ -68,7 +68,7 @@ int main()
         // Print device information
         for (cl_uint j = 0; j < deviceCount; ++j) {
             clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
-            printf("  Device %d: %s\n", j, buffer);
+            printf("  Device %d: %s\n", j+1, buffer);
         }
 
         free(devices);
