@@ -2,7 +2,7 @@
 *"To reinvent the world, one wheel at a time..."*
 
 ## About
-A simple calculator that implements addition `+`, subtraction `-`, multiplication `*`, division `/`, integer exponents `^`, as well as thesquare root `sqrt()` calculations, purely using bitwise operators, array functions, and string functions. There are also no for loops or while loops. The main idea of the implementation is to represent any real number as two arrays of single digit numbers: the whole part, and the fractional part.
+A simple calculator that implements addition `+`, subtraction `-`, multiplication `*`, division `/`, integer exponents `^`, as well as square root `sqrt()` calculations, purely using bitwise operators, array functions, and string functions. There are also no for loops or while loops. The main idea of the implementation is to represent any real number as two arrays of single digit numbers: the whole part, and the fractional part.
 
 ## How To Run
 Make sure you're in the `Klak-klak-klakulator` folder, then just run with Perl:
@@ -81,12 +81,11 @@ perl main.pl
 >>>  1 / 2138923791283
 4.675248384e-13
 ```
-
 8. Enter `exit` to exit the program.
 
 ## Caveats
 1. The program is slow when performing division and `sqrt`. It may take more than a few hundred miliseconds or even a few seconds for a long expression. This is probably just a `skill issue`, but I wouldn't say it's *that* bad.
-2. There may or may not be a few funny results. Basically, I use Newton's method to perform division and sqrt and while the result is only slightly off, it has to be aggresively rounded in order for integer operations to make sense. 
+2. There may or may not be a few funny results. Basically, I use Newton's method to perform division and `sqrt` and while the result is only slightly off, it has to be aggresively rounded in order for integer operations to make sense. 
 
 To put it simply, in order to make *this* possible :
 ```
