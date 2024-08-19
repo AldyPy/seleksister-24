@@ -1,1 +1,1 @@
-gcc main.c -o main -lm -lOpenCL
+gcc main.c -o main -lm -lOpenCL -Wno-deprecated-declarations
