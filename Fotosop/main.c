@@ -15,7 +15,7 @@ uint8_t opencl_test()
 {
     cl_int err;
     cl_uint platformCount;
-    system("rm gray.png");
+    // system("rm gray.png");
 
     // Get the number of platforms
     err = clGetPlatformIDs(0, NULL, &platformCount);
@@ -94,13 +94,12 @@ uint8_t opencl_test()
 
 int main()
 {
-    // uint8_t c = opencl_test() ;
-    // if (c) return 1;
+    uint8_t c = opencl_test() ;
+    if (c) return 1;
 
     char* in = (char*) malloc (50) ;
-    // printf("IMG name: ") ;
-    // scanf("%s", in) ;
-    in = "kasumi.png" ;
+    printf("IMG name: ") ;
+    scanf("%s", in) ;
     char* out = "gray.png" ;
 
     // Load image using stb_image
@@ -114,7 +113,8 @@ int main()
 
     size_t image_size = width * height * channels * sizeof(unsigned char);
     if (image_size < 1000) printf("Image size: %d bytes\n", image_size);
-
+    else printf("Image size: %f KB\n", (float)image_size / 1000) ;
+    printf("Detected channels = %d\n", channels) ;
     // Initialize OpenCL
     cl_int err;
     cl_platform_id platform;
@@ -184,7 +184,7 @@ int main()
     CHECK_ERROR(err);
 
     // Save image using stb_image_write
-    stbi_write_png(out, width, height, STBI_rgb, image, width * 3);
+    stbi_write_png(out, width, height, channels, image, width * channels);
 
     // Clean up
     stbi_image_free(image);
