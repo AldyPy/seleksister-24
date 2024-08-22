@@ -2,11 +2,35 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define and &&
+#define but &&
+#define is ==
+#define or ||
+#define isnt !=
+
+#define GRAY printf("\e[1;90m");
+#define WHITE printf("\e[1;37m");
+#define RESET printf("\033[0m");
+#define RED printf("\e[1;31m");
+#define GREEN printf("\e[1;32m");
+
+// equivalent to input().split() in Python
+char** readlinesplit(int* resultSize) ;
+
+void point_to_help_msg()
+{
+    puts("Faulty input. Enter h/help to display the list of commands or q/quit to exit.\n") ;
+}
+void display_help_msg()
+{
+    puts("This is a help message lmao.") ;
+}
+
 #define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
 void CHECK_ERROR(cl_int err) 
 {
-    if (err != CL_SUCCESS) 
+    if (err isnt CL_SUCCESS) 
     { 
         fprintf(stderr, "OpenCL Error: %d\n", err)  ; 
         exit(EXIT_FAILURE)  ; 
@@ -20,79 +44,180 @@ uint8_t opencl_test()  ;
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stblib/stb_image_write.h"
 
-const char *kernel_source =
+const char *kernel_source =                           "\
+                                                       \
+__kernel void filter(                                  \
+    __global unsigned char *img,                       \
+    const int width,                                   \
+    const int height,                                  \
+    const int channels,                                \
+    const int grayscale,                               \
+    const float contrast,                              \
+    const float saturation                             \
+)                                                      \
+{                                                      \
+    int x = get_global_id(0);                          \
+    int y = get_global_id(1);                          \
+    int idx = (y * width + x) * channels;              \
+    int R = (img[idx]);                                \
+    int G = (img[idx+1]);                              \
+    int B = (img[idx+2]);                              \
+    unsigned char res_R;                               \
+    unsigned char res_G;                               \
+    unsigned char res_B;                               \
+                                                       \
+    if (grayscale)                                     \
+    R=G=B=(R+G+B)/3;                                   \
+                                                       \
+    R = (int)(contrast * ( R - 128 ) ) + 128;          \
+    if (R > 255) R = 255;                              \
+    if (R < 0) R = 0;                                  \
+                                                       \
+    G = (int)(contrast * (G - 128)) + 128;             \
+    if (G > 255) G = 255;                              \
+    if (G < 0) G = 0;                                  \
+                                                       \
+    B = (int)(contrast * (B - 128)) + 128;             \
+    if (B > 255) B = 255;                              \
+    if (B < 0) B = 0;                                  \
+                                                       \
+                                                       \
+    float RF = (float)R/255;                           \
+    float GF = (float)G/255;                           \
+    float BF = (float)B/255;                           \
+    float CMax, CMin;                                  \
+    if (RF>=GF && RF>=BF) CMax=RF;                     \
+    if (GF>=RF && GF>=BF) CMax=GF;                     \
+    if (BF>=GF && BF>=RF) CMax=BF;                     \
+    if (RF<=GF && RF<=BF) CMin=RF;                     \
+    if (GF<=RF && GF<=BF) CMin=GF;                     \
+    if (BF<=GF && BF<=RF) CMin=BF;                     \
+    float delta=CMax-CMin;                             \
+    float H,S,V;                                       \
+                                                       \
+    /* Calculating H */                                \
+    {                                                  \
+                                                       \
+        if (CMax == RF)                                \
+        {                                              \
+            H = (GF - BF) / delta;                     \
+            if (H < 0) H += 6;                         \
+        }                                              \
+        if (CMax == GF)                                \
+        {                                              \
+            H = (BF - RF) / delta;                     \
+            H = H + 2;                                 \
+        }                                              \
+        if (CMax == BF)                                \
+        {                                              \
+            H = (RF - GF) / delta;                     \
+            H = H + 4;                                 \
+        }                                              \
+    }                                                  \
+    if (CMax != 0) { S = (delta / CMax) ; }            \
+    else { S = 0 ; }                                   \
+    V=CMax;                                            \
+                                                       \
+    S *= saturation;                                   \
+    if (S > 1) S = 1;                                  \
+    if (S < 0) S = 0;                                  \
+                                                       \
+    float C = S * V ;                                  \
+    float m = (V - C);                                 \
+    float Hmod2 = H;                                   \
+    if (Hmod2 > 6.0F) Hmod2 -= 6;                      \
+    if (Hmod2 > 4.0F) Hmod2 -= 4;                      \
+    if (Hmod2 > 2.0F) Hmod2 -= 2;                      \
+    float X ;                                          \
+    if (Hmod2 - 1 > 0) X = C * (1 - (Hmod2 - 1)) ;     \
+    else X = C * (1 - (1 - Hmod2)) ;                   \
+    if (H < 1) RF = C, GF = X, BF = 0;                 \
+    else if (H < 2) RF = X, GF = C, BF = 0;            \
+    else if (H < 3) RF = 0, GF = C, BF = X;            \
+    else if (H < 4) RF = 0, GF = X, BF = C;            \
+    else if (H < 5) RF = X, GF = 0, BF = C;            \
+    else if (H < 6) RF = C, GF = 0, BF = X;            \
+    res_R = (unsigned char)(255*(RF + m));             \
+    res_G = (unsigned char)(255*(GF + m));             \
+    res_B = (unsigned char)(255*(BF + m));             \
+                                                       \
+    img[idx+0]=res_R;                                  \
+    img[idx+1]=res_G;                                  \
+    img[idx+2]=res_B;                                  \
+}                                                      \
+";
 
-    "__kernel void grayscale(                           \
-        __global unsigned char *img,                    \
-        const int width,                                \
-        const int height,                               \
-        const int channels                              \
-    )                                                   \
-    {                                                   \
-        int x = get_global_id(0);                       \
-        int y = get_global_id(1);                       \
-        int idx = (y * width + x) * channels;           \
-        unsigned char R = (img[idx]);                   \
-        unsigned char G = (img[idx+1]);                 \
-        unsigned char B = (img[idx+2]);                 \
-        unsigned char res=(unsigned char)((R+G+B)/3);   \
-                                                        \
-        if (x < width && y < height)                    \
-            img[idx]=img[idx+1]=img[idx+2]=res;         \
-    }                                                   \
-                                                        \
-    __kernel void contrast(                             \
-        __global unsigned char *img,                    \
-        const int width,                                \
-        const int height,                               \
-        const int channels                              \
-    )                                                   \
-    {                                                   \
-        int x = get_global_id(0);                       \
-        int y = get_global_id(1);                       \
-        int idx = (y * width + x) * channels;           \
-        unsigned char R = (img[idx]);                   \
-        unsigned char G = (img[idx+1]);                 \
-        unsigned char B = (img[idx+2]);                 \
-        unsigned char res=(unsigned char)((R+G+B)/3);   \
-                                                        \
-        if (x < width && y < height)                    \
-            img[idx]=img[idx+1]=img[idx+2]=res;         \
-    }                                                   \
-                                                        \
-    __kernel void saturation(                           \
-        __global unsigned char *img,                    \
-        const int width,                                \
-        const int height,                               \
-        const int channels                              \
-    )                                                   \
-    {                                                   \
-        int x = get_global_id(0);                       \
-        int y = get_global_id(1);                       \
-        int idx = (y * width + x) * channels;           \
-        unsigned char R = (img[idx]);                   \
-        unsigned char G = (img[idx+1]);                 \
-        unsigned char B = (img[idx+2]);                 \
-        unsigned char res=(unsigned char)((R+G+B)/3);   \
-                                                        \
-        if (x < width && y < height)                    \
-            img[idx]=img[idx+1]=img[idx+2]=res;         \
-    }" ;
+char** tokens;
+int token_count = 0;
+void free_tokens()
+{
+    for (int i=0;i<token_count;i++)free(tokens[i]);
+}
 
+int gray = -2;
+float contrast = -2.0F;
+float saturation = -2.0F;
+void print_state()
+{
+    printf("-Current modifiers- \n") ;
+    
+    if (gray == -2 && contrast == -2.0F && saturation == -2.0F)
+    {
+        GRAY printf("NONE\n"); RESET;
+        return;
+    }
+
+    if (gray != -2)
+    {
+        WHITE printf("Grayscale: ") ;
+        if (gray) { GREEN printf("ON") ; RESET }
+        else { GRAY printf("OFF") ; RESET }
+        printf("\n");
+    }
+
+    if (contrast != -2.0F)
+    {
+        WHITE printf("Contrast: %.2f", contrast);
+        float diff = contrast - 1.0F;
+        if (diff > 0) { GREEN printf("(+%.2f)", diff) ; }
+        else { RED printf("%.2f", diff) ; }
+        RESET;
+        printf("\n");
+    }
+
+    if (saturation != -2.0F)
+    {
+        WHITE printf("Saturation: %.2f", saturation);
+        float diff = saturation - 1.0F;
+        if (diff > 0) { GREEN printf("(+%.2f)", diff) ; }
+        else { RED printf("%.2f", diff) ; }
+        RESET;
+        printf("\n");
+    }
+    
+}
 
 int main()
 {
+
     // test open cl interface
     uint8_t c = opencl_test() ;
     if (c) return 1;
 
     // Load image
-    char* in = (char*) malloc (50) ;
+    main_imageinput:
     printf("Load image: ") ;
-    scanf("%s", in) ;
+    tokens = readlinesplit(&token_count);
+    if (token_count == 0 or token_count > 1)
+    {
+        point_to_help_msg() ;
+        goto main_imageinput ;
+    }
+    
     printf("Loading image... \n") ;
     int width, height, channels;
-    uint8_t *image = stbi_load(in, &width, &height, &channels, 0);
+    uint8_t *image = stbi_load(tokens[0], &width, &height, &channels, 0);
+
     if (!image) 
     {
         fprintf(stderr, "Failed to load image.\n");
@@ -130,101 +255,149 @@ int main()
     clBuildProgram(program, 1, &device, NULL, NULL, NULL);
     CHECK_ERROR(err);
 
-    #define GRAYSCALE_KERNEL    0
-    #define CONTRAST_KERNEL     1
-    #define SATURATION_KERNEL   2
-
-    cl_kernel kernels[3] ;
-    kernels[0]=clCreateKernel(program, "grayscale", &err),
-    CHECK_ERROR(err);
-    kernels[1]=clCreateKernel(program, "contrast", &err);
-    CHECK_ERROR(err);
-    kernels[2]=clCreateKernel(program, "saturation", &err);
+    cl_kernel colonel = clCreateKernel(program, "filter", &err);
     CHECK_ERROR(err);
 
-    cl_kernel current_colonel ;
-    CHECK_ERROR(err);
     printf("Done!\n\n") ;
 
-    
-        
-        char* in_token = (char*) malloc(100) ;
-        main_validateinput:
+        main_validateinput :
+
         printf(">>> ") ;
-        scanf("%s", in_token) ;
-        if (strcmp(in_token, "g") == 0 || strcmp(in_token, "grayscale") == 0 )
+        tokens = readlinesplit(&token_count);
+
+        if (token_count == 0) goto main_validateinput ;
+        if (token_count > 2)
         {
-            current_colonel = kernels[GRAYSCALE_KERNEL] ;
+            point_to_help_msg() ;
+            goto main_validateinput;
         }
-        else if (strcmp(in_token, "c") == 0 || strcmp(in_token, "contrast") == 0)
+
+        if (strcmp(tokens[0], "g") == 0 || strcmp(tokens[0], "grayscale") == 0 )
         {
-            current_colonel = kernels[CONTRAST_KERNEL];
+            gray = (gray == -2 ? 1 : 1 - gray) ;
         }
-        else if (strcmp(in_token, "s") == 0 || strcmp(in_token, "saturation") == 0)
-        {
-            current_colonel = kernels[SATURATION_KERNEL];
+        else if (strcmp(tokens[0], "c") == 0 || strcmp(tokens[0], "contrast") == 0)
+        {   
+            char* endptr;
+            float C = strtof(tokens[1], &endptr);
+            if (*endptr != 0 or C < 0 or C > 2)
+            {
+                point_to_help_msg();
+                goto main_validateinput;
+            }
+            contrast = C ;
         }
-        else if (strcmp(in_token, "done") == 0 || strcmp(in_token, "stop") == 0)
+        else if (strcmp(tokens[0], "s") == 0 || strcmp(tokens[0], "saturation") == 0)
         {
-            goto main_save;
+            char* endptr;
+            float S = strtof(tokens[1], &endptr);
+            if (*endptr != 0 or S < 0 or S > 2)
+            {
+                point_to_help_msg();
+                goto main_validateinput;
+            }
+            saturation = S ;
+        }
+        else if (strcmp(tokens[0], "d") == 0 || strcmp(tokens[0], "done") == 0)
+        {
+            goto main_calculate;
+        }
+        else if (strcmp(tokens[0], "h") == 0 || strcmp(tokens[0], "help") == 0)
+        {
+            display_help_msg();
+        }
+        else if (strcmp(tokens[0], "q") == 0 || strcmp(tokens[0], "quit") == 0)
+        {
+            goto clean;
+        }
+        else if (strcmp(tokens[0], "i") == 0 || strcmp(tokens[0], "info") == 0)
+        {
+            print_state();
         }
         else
         {
-            printf("Faulty input!\n");
-            goto main_validateinput;
+            point_to_help_msg() ;
         }
+        goto main_validateinput;
         CHECK_ERROR(err);
 
 
-        // Set kernel arguments
-        clSetKernelArg(current_colonel, 0, sizeof(cl_mem), &d_image);
-        CHECK_ERROR(err);
-        clSetKernelArg(current_colonel, 1, sizeof(int), &width);
-        CHECK_ERROR(err);
-        clSetKernelArg(current_colonel, 2, sizeof(int), &height);
-        CHECK_ERROR(err);
-        clSetKernelArg(current_colonel, 3, sizeof(int), &channels);
-        CHECK_ERROR(err);
+    main_calculate:
+    printf("Processing...\n");
+    // Set kernel arguments
+    clSetKernelArg(colonel, 0, sizeof(cl_mem), &d_image);
+    CHECK_ERROR(err);
+    clSetKernelArg(colonel, 1, sizeof(int), &width);
+    CHECK_ERROR(err);
+    clSetKernelArg(colonel, 2, sizeof(int), &height);
+    CHECK_ERROR(err);
+    clSetKernelArg(colonel, 3, sizeof(int), &channels);
+    CHECK_ERROR(err);
 
-        // Transfer data to GPU
-        clEnqueueWriteBuffer(queue, d_image, CL_TRUE, 0, image_size, image, 0, NULL, NULL);
-        CHECK_ERROR(err);
+    if (gray == -2) gray = 0;
+    clSetKernelArg(colonel, 4, sizeof(int), &gray);
+    CHECK_ERROR(err);
+    if (contrast == -2.0F) contrast = 1.0F;
+    clSetKernelArg(colonel, 5, sizeof(float), &contrast);
+    CHECK_ERROR(err);
+    if (saturation == -2.0F) saturation = 1.0F;
+    clSetKernelArg(colonel, 6, sizeof(float), &saturation);
+    CHECK_ERROR(err);
 
-        // Execute kernel
-        size_t global_work_size[2] = { (size_t)width, (size_t)height };
-        CHECK_ERROR(err);
-        clEnqueueNDRangeKernel(queue, current_colonel, 2, NULL, global_work_size, NULL, 0, NULL, NULL);
-        CHECK_ERROR(err);
-        clFinish(queue);
-        CHECK_ERROR(err);
+    // Transfer data to GPU
+    clEnqueueWriteBuffer(queue, d_image, CL_TRUE, 0, image_size, image, 0, NULL, NULL);
+    CHECK_ERROR(err);
 
-        // Transfer data back to CPU
-        clEnqueueReadBuffer(queue, d_image, CL_TRUE, 0, image_size, image, 0, NULL, NULL);
-        CHECK_ERROR(err);
+    // Execute kernel
+    size_t global_work_size[2] = { (size_t)width, (size_t)height };
+    CHECK_ERROR(err);
+    clEnqueueNDRangeKernel(queue, colonel, 2, NULL, global_work_size, NULL, 0, NULL, NULL);
+    CHECK_ERROR(err);
+    clFinish(queue);
+    CHECK_ERROR(err);
 
-        goto main_validateinput ;
+    // Transfer data back to CPU
+    clEnqueueReadBuffer(queue, d_image, CL_TRUE, 0, image_size, image, 0, NULL, NULL);
+    CHECK_ERROR(err);
 
     // Save image using stb_image_write
     main_save:
 
-    #define WHITE printf("\e[1;37m")
-    #define RESET printf("\033[0m")
     char out[100];
-    WHITE; printf("Name your file (\"out.png\" if blank): ") ; RESET ;
-    scanf("%s", out);
+    WHITE printf("Name your file (\"out.png\" if blank): ") ; RESET ;
+    
+    save_loop:
+    tokens = readlinesplit(&token_count);
+    if (token_count == 0)
+    {
+        strcpy(out, "out.png");
+    }
+    else if (token_count == 1)
+    {
+        int size = strlen(tokens[0]);
+        if (    size <= 4 or
+                (tokens[0][size - 4] isnt '.') or 
+                (tokens[0][size - 3] isnt 'p') or 
+                (tokens[0][size - 2] isnt 'n') or 
+                (tokens[0][size - 1] isnt 'g')) {
+            
+            WHITE printf("Error. Please enter a filename ending in \".png\": ") ; RESET;
+            goto save_loop;
+        }
 
+        strcpy(out, tokens[0]);
+    }
 
     // save and clean up
     printf("Saving and cleaning up...\n") ;
     stbi_write_png(out, width, height, channels, image, width * channels);
-    stbi_image_free(image);
-
-    free(in) ;
     
+    clean:
+    stbi_image_free(image);
+    free_tokens();
+
     clReleaseMemObject(d_image);
-    clReleaseKernel(kernels[GRAYSCALE_KERNEL]);
-    clReleaseKernel(kernels[CONTRAST_KERNEL]);
-    clReleaseKernel(kernels[SATURATION_KERNEL]);
+    clReleaseKernel(colonel);
     clReleaseProgram(program);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
@@ -232,10 +405,45 @@ int main()
     printf("OK !\n") ;
 
     return 0;
-
-    
 }
 
+
+char** readlinesplit(int* resSize)
+{
+    free_tokens();
+    char inp[100];
+    fgets(inp, 100, stdin);
+
+    *resSize = 0;
+    int i;
+    int token_cnt = 0;
+    for (i = 0; inp[i] isnt '\n'; i++)
+        token_cnt += (inp[i] isnt 32 but (inp[i + 1] is 32 or inp[i + 1] is 10)) ;
+    
+    char** res = (char**) malloc (sizeof(char*) * token_cnt) ;
+
+    i = 0;
+    char buf[100];
+    int l = 0, r = 0;
+    for (;inp[r] isnt '\0';r++)
+    {
+        if ((inp[r] is 32 or inp[r] is 10) and i > 0)
+        {
+            buf[i++] = 0;
+            res[(*resSize)] = (char*) malloc (i * sizeof(char)) ;
+            strcpy(res[(*resSize)], buf) ;
+            i = 0;
+            (*resSize)++;
+        }
+        else if (inp[r] != 32)
+        {
+            if (i is 100) { exit(1) ; }
+            buf[i++] = inp[r] ;
+        }
+    }
+
+    return res;
+}
 
 uint8_t opencl_test()
 {
@@ -245,7 +453,7 @@ uint8_t opencl_test()
 
     // Get the number of platforms
     err = clGetPlatformIDs(0, NULL, &platformCount);
-    if (err != CL_SUCCESS || platformCount == 0) {
+    if (err isnt CL_SUCCESS || platformCount is 0) {
         printf("No OpenCL platforms found.\n");
         return 1;
     }
@@ -259,7 +467,7 @@ uint8_t opencl_test()
 
     // Get the platform IDs
     err = clGetPlatformIDs(platformCount, platforms, NULL);
-    if (err != CL_SUCCESS) {
+    if (err isnt CL_SUCCESS) {
         printf("Failed to get platform IDs.\n");
         free(platforms);
         return 1;
@@ -275,7 +483,7 @@ uint8_t opencl_test()
         // Get the number of devices for this platform
         cl_uint deviceCount;
         err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &deviceCount);
-        if (err != CL_SUCCESS) 
+        if (err isnt CL_SUCCESS) 
         {
             printf("Failed to get device count for platform %d.\n", i);
             continue;
@@ -291,7 +499,7 @@ uint8_t opencl_test()
 
         // Get the device IDs
         err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount, devices, NULL);
-        if (err != CL_SUCCESS) 
+        if (err isnt CL_SUCCESS) 
         {
             printf("Failed to get device IDs for platform %d.\n", i);
             free(devices);
