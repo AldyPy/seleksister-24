@@ -299,10 +299,14 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 
     static HBITMAP hBitmap = NULL;
     static BYTE *pixels = NULL;
+    static int window_width, window_height;
     
     switch (msg) {
 
         case WM_CREATE: {
+
+            window_height = image_height ;
+            window_width = image_width ;
             
             // Create a compatible DC
             HDC hdc = GetDC(hwnd);
@@ -333,6 +337,11 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         }
         break;
 
+        case WM_SIZE :
+            window_width = LOWORD(lParam);
+            window_height = HIWORD(lParam);
+            InvalidateRect(hwnd, NULL, TRUE); // Trigger a repaint
+            break;
 
         case WM_DESTROY:
             DeleteObject(hBitmap); // Delete the bitmap
@@ -353,7 +362,7 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             BITMAP bitmap;
             GetObject(hBitmap, sizeof(bitmap), &bitmap); // Get bitmap info
 
-            StretchBlt(hdc, 0, 0, image_width, image_height, hdcMem, 
+            StretchBlt(hdc, 0, 0, window_width, window_height, hdcMem, 
             0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
 
             // Cleanup
@@ -415,7 +424,7 @@ void CreatePreviewWindow(HINSTANCE hInstance) {
 
     HWND hwndPreview = CreateWindow(
         wc.lpszClassName, "Image Preview",
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+        WS_SIZEBOX | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT,
         preview_width, image_height, NULL, NULL, hInstance, NULL
     );
