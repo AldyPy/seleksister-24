@@ -1,3 +1,8 @@
+# TODO:
+1. compile linux.
+2. fix extensions.
+3. (maybe) test on other's pc
+
 # Fotosop
 *"The fastest pixel processor in the west..."*
 
