@@ -1,1 +1,0 @@
-gcc winmain.c -o winmain.exe -lcomdlg32 -lgdi32 -luser32 -lOpenCL -Wno-deprecated-declarations -I"C:/Program Files (x86)/OCL_SDK_Light/include" -L"C:/Program Files (x86)/OCL_SDK_Light/lib/x86_64"

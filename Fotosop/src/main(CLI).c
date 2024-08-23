@@ -13,6 +13,7 @@
 #define RESET printf("\033[0m");
 #define RED printf("\e[1;31m");
 #define GREEN printf("\e[1;32m");
+#define BLUE printf("\e[1;34m");
 
 // equivalent to input().split() in Python
 char** readlinesplit(int* resultSize) ;
@@ -23,7 +24,21 @@ void point_to_help_msg()
 }
 void display_help_msg()
 {
-    puts("This is a help message lmao.") ;
+    puts("Here is a list of commands.\n");
+
+    puts("~ Control commands:");
+    puts("h/help: prints this help message");
+    puts("q/quit: exit the program immediately without saving");
+    puts("d/done: finish editing and save the image");
+    puts("i/info: print the current state of the filters you have chosen\n");
+    puts("~ Image editing filters:");
+    puts("g/gray/grey: toggles grayscale");
+    puts("c/contrast X: sets your desired contrast level to X");
+    puts("s/saturation X: sets your desired saturation level to X\n");
+    puts("For contrast and saturation, set a decimal number from 0 to 2 (otheriwse it is not accepted).");
+    puts("To clarify, 1 is the default/unaltered value");
+    printf("Some examples: "); BLUE printf("c 1.63"); RESET printf(" or "); BLUE printf("saturation 0.4"); RESET 
+    puts("\n");
 }
 
 #define CL_TARGET_OPENCL_VERSION 300
@@ -36,8 +51,6 @@ void CHECK_ERROR(cl_int err)
         exit(EXIT_FAILURE)  ; 
     }
 }
-
-uint8_t opencl_test()  ;
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stblib/stb_image.h"
@@ -205,19 +218,14 @@ void print_state()
 
 int main()
 {
-
-    // test open cl interface
-    uint8_t c = opencl_test() ;
-    if (c) return 1;
-
     // Load image
     main_imageinput:
     printf("Load image: ") ;
     tokens = readlinesplit(&token_count);
     if (token_count == 0 or token_count > 1)
     {
-        point_to_help_msg() ;
-        goto main_imageinput ;
+        printf("You should input exactly only one token; the input file name.\n");
+        exit(0);
     }
     
     printf("Loading image... \n") ;
@@ -243,28 +251,16 @@ int main()
 
     cl_device_id device;
     clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
-
     cl_context context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
-    CHECK_ERROR(err);
-
     cl_command_queue queue = clCreateCommandQueue(context, device, 0, &err);
-    CHECK_ERROR(err);
-
     cl_mem d_image = clCreateBuffer(context, CL_MEM_READ_WRITE, image_size, NULL, &err);
-    CHECK_ERROR(err);
-
-    // initialize Kernels
-    printf("Initializing Kernels...\n");
     cl_program program = clCreateProgramWithSource(context, 1, &kernel_source, NULL, &err);
     CHECK_ERROR(err);
-
     clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-    CHECK_ERROR(err);
-
     cl_kernel colonel = clCreateKernel(program, "filter", &err);
     CHECK_ERROR(err);
 
-    printf("Done!\n\n") ;
+    printf("Done! You are now in edit mode. For a list of commands, type h or help\n\n") ;
 
         main_validateinput :
 
@@ -278,7 +274,7 @@ int main()
             goto main_validateinput;
         }
 
-        if (strcmp(tokens[0], "g") == 0 || strcmp(tokens[0], "grayscale") == 0 )
+        if (strcmp(tokens[0], "g") == 0 || strcmp(tokens[0], "gray") == 0 || strcmp(tokens[0], "grey") == 0)
         {
             gray = (gray == -2 ? 1 : 1 - gray) ;
         }
@@ -449,79 +445,4 @@ char** readlinesplit(int* resSize)
     }
 
     return res;
-}
-
-uint8_t opencl_test()
-{
-    cl_int err;
-    cl_uint platformCount;
-    // system("rm gray.png");
-
-    // Get the number of platforms
-    err = clGetPlatformIDs(0, NULL, &platformCount);
-    if (err isnt CL_SUCCESS || platformCount is 0) {
-        printf("No OpenCL platforms found.\n");
-        return 1;
-    }
-
-    // Allocate space for platforms
-    cl_platform_id* platforms = (cl_platform_id*)malloc(platformCount * sizeof(cl_platform_id));
-    if (!platforms) {
-        printf("Failed to allocate memory for platforms.\n");
-        return 1;
-    }
-
-    // Get the platform IDs
-    err = clGetPlatformIDs(platformCount, platforms, NULL);
-    if (err isnt CL_SUCCESS) {
-        printf("Failed to get platform IDs.\n");
-        free(platforms);
-        return 1;
-    }
-
-    // Print platform information
-    for (cl_uint i = 0; i < platformCount; ++i) 
-    {
-        char buffer[1024];
-        clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL);
-        printf("Platform %d: %s\n", i+1, buffer);
-
-        // Get the number of devices for this platform
-        cl_uint deviceCount;
-        err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &deviceCount);
-        if (err isnt CL_SUCCESS) 
-        {
-            printf("Failed to get device count for platform %d.\n", i);
-            continue;
-        }
-
-        // Allocate space for devices
-        cl_device_id* devices = (cl_device_id*)malloc(deviceCount * sizeof(cl_device_id));
-        if (!devices) 
-        {
-            printf("Failed to allocate memory for devices.\n");
-            continue;
-        }
-
-        // Get the device IDs
-        err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount, devices, NULL);
-        if (err isnt CL_SUCCESS) 
-        {
-            printf("Failed to get device IDs for platform %d.\n", i);
-            free(devices);
-            continue;
-        }
-
-        // Print device information
-        for (cl_uint j = 0; j < deviceCount; ++j) 
-        {
-            clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
-            printf("  Device %d: %s\n", j+1, buffer);
-        }
-
-        free(devices);
-    }
-    free(platforms);
-
-    return 0;
 }
