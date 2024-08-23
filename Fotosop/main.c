@@ -66,20 +66,6 @@ __kernel void filter(                                  \
     unsigned char res_G;                               \
     unsigned char res_B;                               \
                                                        \
-    if (grayscale)                                     \
-    R=G=B=(R+G+B)/3;                                   \
-                                                       \
-    R = (int)(contrast * ( R - 128 ) ) + 128;          \
-    if (R > 255) R = 255;                              \
-    if (R < 0) R = 0;                                  \
-                                                       \
-    G = (int)(contrast * (G - 128)) + 128;             \
-    if (G > 255) G = 255;                              \
-    if (G < 0) G = 0;                                  \
-                                                       \
-    B = (int)(contrast * (B - 128)) + 128;             \
-    if (B > 255) B = 255;                              \
-    if (B < 0) B = 0;                                  \
                                                        \
                                                        \
     float RF = (float)R/255;                           \
@@ -141,6 +127,24 @@ __kernel void filter(                                  \
     res_G = (unsigned char)(255*(GF + m));             \
     res_B = (unsigned char)(255*(BF + m));             \
                                                        \
+    if (grayscale)                                     \
+    res_R=res_G=res_B=(res_R+res_G+res_B)/3;           \
+                                                       \
+    R = (int)(contrast * ( res_R - 128 ) ) + 128;      \
+    if (R > 255) R = 255;                              \
+    if (R < 0) R = 0;                                  \
+    res_R = (unsigned char) R;                         \
+                                                       \
+    G = (int)(contrast * (res_G - 128)) + 128;         \
+    if (G > 255) G = 255;                              \
+    if (G < 0) G = 0;                                  \
+    res_G = (unsigned char) G;                         \
+                                                       \
+    B = (int)(contrast * (res_B - 128)) + 128;         \
+    if (B > 255) B = 255;                              \
+    if (B < 0) B = 0;                                  \
+    res_B = (unsigned char) B;                         \
+                                                       \
     img[idx+0]=res_R;                                  \
     img[idx+1]=res_G;                                  \
     img[idx+2]=res_B;                                  \
@@ -179,20 +183,22 @@ void print_state()
     {
         WHITE printf("Contrast: %.2f", contrast);
         float diff = contrast - 1.0F;
-        if (diff > 0) { GREEN printf("(+%.2f)", diff) ; }
+        printf("(");
+        if (diff >= 0) { GREEN printf("+%.2f", diff) ; }
         else { RED printf("%.2f", diff) ; }
-        RESET;
-        printf("\n");
+        WHITE printf(")\n");
+        RESET
     }
 
     if (saturation != -2.0F)
     {
         WHITE printf("Saturation: %.2f", saturation);
         float diff = saturation - 1.0F;
-        if (diff > 0) { GREEN printf("(+%.2f)", diff) ; }
+        printf("(");
+        if (diff > 0) { GREEN printf("+%.2f", diff) ; }
         else { RED printf("%.2f", diff) ; }
+        WHITE printf(")\n");
         RESET;
-        printf("\n");
     }
     
 }
