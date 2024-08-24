@@ -18,6 +18,8 @@ You can just watch this if you don't want to read the instructions (if it hasn't
 ![](images/tutorial.gif)
 
 **Instructions**
+
+0. The program is safe, it isn't a trojan. Source(s): dude trust me.
 1. Right after running the program, you are prompted to choose a file. The accepted file extensions are `.jpg`, `.jpeg`, `.png`, and `.bmp`.
 2. Two windows will open: the edit window and the live preview. Use the edit window to tweak your filters to your heart's content. You can see a preview of the result in the other window.
 3. For grayscale, input `1` to toggle it on or any other value to toggle it off.
