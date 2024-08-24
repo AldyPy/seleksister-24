@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #define and &&
 #define but &&
@@ -17,6 +18,16 @@
 
 // equivalent to input().split() in Python
 char** readlinesplit(int* resultSize) ;
+
+uint8_t is_suffix(char* s, char* suf)
+{
+    size_t slen = strlen(s), suflen = strlen(suf);
+    if (slen < suflen) return 0;
+    for (int i = 0; i < suflen ; i++)
+        if (suf[suflen - i - 1] != s[slen - i - 1]) return 0;
+    
+    return 1;
+}
 
 void point_to_help_msg()
 {
@@ -376,24 +387,31 @@ int main()
     }
     else if (token_count == 1)
     {
-        int size = strlen(tokens[0]);
-        if (    size <= 4 or
-                (tokens[0][size - 4] isnt '.') or 
-                (tokens[0][size - 3] isnt 'p') or 
-                (tokens[0][size - 2] isnt 'n') or 
-                (tokens[0][size - 1] isnt 'g')) {
-            
-            WHITE printf("Error. Please enter a filename ending in \".png\": ") ; RESET;
+        strcpy(out, tokens[0]);
+
+        if (is_suffix(tokens[0], ".png"))
+        {
+            printf("Saving and cleaning up...\n") ;
+            stbi_write_png(out, width, height, channels, image, width * channels);
+        }
+        else if (is_suffix(tokens[0], ".jpeg") || is_suffix(tokens[0], ".jpg"))
+        {
+            printf("Saving and cleaning up...\n") ;
+            stbi_write_jpg(out, width, height, channels, image, width * channels);
+        }
+        else if (is_suffix(tokens[0], ".bmp"))
+        {
+            printf("Saving and cleaning up...\n") ;
+            stbi_write_bmp(out, width, height, channels, image);
+        }
+        else
+        {
+            WHITE printf("Error. Please enter a filename ending in \".png\", \".jpeg\", \".jpg\", or \".bmp\": ") ; RESET;
             goto save_loop;
         }
 
-        strcpy(out, tokens[0]);
     }
 
-    // save and clean up
-    printf("Saving and cleaning up...\n") ;
-    stbi_write_png(out, width, height, channels, image, width * channels);
-    
     clean:
     stbi_image_free(image);
     free_tokens();
