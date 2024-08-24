@@ -1,26 +1,28 @@
-# TODO:
-1. compile linux.
-2. fix extensions.
-3. (maybe) test on other's pc
-
 # Fotosop
 *"The fastest pixel processor in the west..."*
 
 ## About
-A simple program to modify the contrast and saturation of an image, as well as apply a greyscale filter. The program uses the OpenCL library for GPU processing and the stb library for image processing.
+A simple program to modify the contrast and saturation of an image, as well as apply a greyscale filter. The program uses the [OpenCL library](https://github.com/KhronosGroup/OpenCL-SDK) for GPU processing and the [stb library](https://github.com/nothings/stb) for image processing.
 
 ## How To Run
 I have made 2 programs. Choose the one that suits you.
-1. **GUI**: click and open the executable `Fotosop.exe`, it is inside the `bin` folder. **This is Windows only.**
-2. **Command line:** run the executable `Fotosop(CLI).exe`, it is also inside the `bin` folder. For Unix, there is also an executable `Fotosop`.
+1. **GUI**: click and open the executable `Fotosop.exe`. **This is Windows only.**
+2. **Command line:** For windows, run the executable `Fotosop(CLI).exe`. For Unix, run `Fotosop`.
 
 ## How To Use
 
-### **GUI**: 
+### **GUI**:
+
+You can just watch this if you don't want to read the instructions.
+![Image](https://s10.gifyu.com/images/Sompt.gif "FotosopGIF")
+
+**Instructions**
 1. Right after running the program, you are prompted to choose a file. The accepted file extensions are `.jpg`, `.jpeg`, `.png`, and `.bmp`.
 2. Two windows will open: the edit window and the live preview. Use the edit window to tweak your filters to your heart's content. You can see a preview of the result in the other window.
-3. Click `Save image` once you are done. You can also safely close either of the two windows and the program will exit (the image will not be saved).
-4. When saving the image, please write `.jpg`, `.jpeg`, `.png`, or `.bmp` according to the format you would like. Other extensions are rejected and the dialog will close (if that happens just click the save button again to try again).
+3. For grayscale, input `1` to toggle it on or any other value to toggle it off.
+4. For contrast and saturation, input a number between 0 and 200. This is a percentage value, 100% is the default. Any other value will be fit into between 0 and 200.
+5. Click `Save image` once you are done. You can also safely close either of the two windows and the program will exit (the image will not be saved).
+6. When saving the image, please write `.jpg`, `.jpeg`, `.png`, or `.bmp` according to the format you would like. Other extensions are rejected and the dialog will close (if that happens just click the save button again to try again).
 
 ### **Command Line**:
 0. Please do not exit the program abruptly with `ctrl+c` so as to not cause any memory problems (fortunately that has not happened to me before, but who knows).
@@ -43,7 +45,7 @@ To clarify, 1 is the default/unaltered value
 Some examples: c 1.63 or saturation 0.4
 ```
 
-3. Follow those instructions to edit the image the way you want using the gray, saturation, and contrast commands. Once done, type use the `done` command to save the file. You will be prompted to enter a file name.
+3. Follow those instructions to edit the image the way you want using the gray, saturation, and contrast commands. Once done, type the `done` command to save the file. You will be prompted to enter a file name.
 4. Here is an example usage:
 ```
 Load image: [FILENAME]
@@ -81,7 +83,7 @@ You can see above there are some weird blue specs sorrounding the light near the
 
 You can see the resulting image is clean. 
 
-This is actually due to how Windows' `StretchBlt` function handles the image as it resizes, but without using that, the image couldn't be dynamically resized. It means that for very large images, you could only see the top left part. Unless your monitor is 4k, that is. This is obviously a large problem (hehe pun intended) so I thought `StretchBlt` was okay at the cost of a slightly weird colors.
+I think that this is  due to how Windows' `StretchBlt` function handles the image as it resizes, but without using that, the image couldn't be dynamically resized. It means that for very large images, you could only see the top left part. Unless your monitor is 4k, that is. This is obviously a large problem (hehe pun intended) so I thought `StretchBlt` was okay at the cost of a few slightly weird colors (instead of spending more time to  find another way to do it).
 
 ## Author
 

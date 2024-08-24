@@ -9,6 +9,7 @@
 #define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
 #include <commdlg.h>
+#include "r.rc"
 
 #define also 
 #define and &&
@@ -178,7 +179,7 @@ void InitializeOpenCL()
     clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
     if (err) 
     {
-        MessageBox(NULL, "No OpenCL platform found. Please install an OpenCL runtime for your graphics drivers.", "Error", MB_OK | MB_ICONERROR);
+        MessageBox(NULL, "No OpenCL GPU device found. Sorry :(", "Error", MB_OK | MB_ICONERROR);
         exit(0);
     }
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -212,7 +213,6 @@ void CHECK_ERROR(cl_int err)
 {
     if (err isnt CL_SUCCESS) 
     { 
-        fprintf(stderr, "OpenCL Error: %d\n", err)  ;
         char err_msg[50] = "OpenCL Error. Code: ";
         char err_str[20];
         itoa(err, err_str, 10);
@@ -466,6 +466,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 
     static HWND hButton;
+
     switch (msg) {
         case WM_CREATE: {
 
@@ -489,16 +490,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             SendMessage(hTitle, WM_SETFONT, (WPARAM) calibri68, 1);
 
 
-            int offset = 40;
-            int width = 75;  // Width of each text box
+            int offset = 60;
+            int width = 80;  // Width of each text box
             int height = 20;  // Height of each text box
-            int x = center-(width/2) + offset;  // Center horizontally (assuming window width is 640)
-            int y = 150;  // Starting y position
-            int promptWidth = 75;
+            int x = center-(width/2) + offset;  // Center horizontally
+            int y = 125;  // Starting y position
+            int promptWidth = 135;
             int promptX = center-(promptWidth/2) - offset;
 
             // First text box
-            HWND graytext = CreateWindow("STATIC", "Grayscale:", SS_CENTER | WS_CHILD | WS_VISIBLE,
+            HWND graytext = CreateWindow("STATIC", "Grayscale (0/1):", WS_CHILD | WS_VISIBLE | SS_RIGHT ,
                         promptX, y, promptWidth, height, hwnd, NULL,
                      (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
             SendMessage(graytext, WM_SETFONT, (WPARAM) calibri20, 1);
@@ -509,7 +510,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
             // Second text box
             y += 30;  // Adjust y position for the second text box
-            HWND contrastext = CreateWindow("STATIC", "Contrast:", SS_CENTER | WS_CHILD | WS_VISIBLE,
+            HWND contrastext = CreateWindow("STATIC", "Contrast (0-200%):", WS_CHILD | WS_VISIBLE | SS_RIGHT,
                         promptX, y, promptWidth, height, hwnd, NULL,
                      (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
             SendMessage(contrastext, WM_SETFONT, (WPARAM) calibri20, 1);
@@ -520,7 +521,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             
             // Third text box
             y += 30;  // Adjust y position for the third text box
-            HWND satext = CreateWindow("STATIC", "Saturation:", SS_CENTER | WS_CHILD | WS_VISIBLE,
+            HWND satext = CreateWindow("STATIC", "Saturation (0-200%):",  WS_CHILD | WS_VISIBLE | SS_RIGHT,
                     promptX, y, promptWidth, height, hwnd, NULL,
                      (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
             SendMessage(satext, WM_SETFONT, (WPARAM) calibri20, 1);
@@ -529,10 +530,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                         (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE), NULL);
             SetWindowText(satr_inp, "100");
 
-
             int button_height = 30;
             int button_width = 100;
-            y += 30;
+            y += 50;
 
             hButton = CreateWindowEx(
                 0,                             // Optional window styles
@@ -551,10 +551,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             
         } break;
 
+        case WM_CTLCOLORSTATIC:
+        {
+            HDC hdcStatic = (HDC)wParam;
+            SetBkMode(hdcStatic, TRANSPARENT);
+            return (INT_PTR)GetStockObject(NULL_BRUSH);
+        }
+
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
-        
 
         case WM_COMMAND: {
             switch (HIWORD(wParam)) {
@@ -689,6 +695,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     WNDCLASS wc = {0};
+    wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(102));
 
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
