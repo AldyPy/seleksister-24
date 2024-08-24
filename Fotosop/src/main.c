@@ -167,13 +167,30 @@ uint8_t is_suffix(char* s, char* suf)
 void InitializeOpenCL()
 {
     printf("Initializing OpenCL...\n");
+    
     clGetPlatformIDs(1, &platform, NULL);
+    if (err) 
+    {
+        MessageBox(NULL, "No OpenCL platform found. Please install an OpenCL runtime for your graphics drivers.", "Error", MB_OK | MB_ICONERROR);
+        exit(0);
+    }
+
     clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+    if (err) 
+    {
+        MessageBox(NULL, "No OpenCL platform found. Please install an OpenCL runtime for your graphics drivers.", "Error", MB_OK | MB_ICONERROR);
+        exit(0);
+    }
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
+    CHECK_ERROR(err);
     queue = clCreateCommandQueue(context, device, 0, &err);
+    CHECK_ERROR(err);
     d_image = clCreateBuffer(context, CL_MEM_READ_WRITE, image_size, NULL, &err);
+    CHECK_ERROR(err);
     program = clCreateProgramWithSource(context, 1, &kernel_source, NULL, &err);
+    CHECK_ERROR(err);
     clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+    CHECK_ERROR(err);
     colonel = clCreateKernel(program, "filter", &err);
     CHECK_ERROR(err);
     printf("Done!\n");
@@ -195,11 +212,19 @@ void CHECK_ERROR(cl_int err)
 {
     if (err isnt CL_SUCCESS) 
     { 
-        fprintf(stderr, "OpenCL Error: %d\n", err)  ; 
+        fprintf(stderr, "OpenCL Error: %d\n", err)  ;
+        char err_msg[50] = "OpenCL Error. Code: ";
+        char err_str[20];
+        itoa(err, err_str, 10);
+        strcat(err_msg, err_str);
+
+        MessageBox(NULL, err_msg, "Error", MB_OK | MB_ICONERROR);
+
         CleanOpenCL();
+        if (img_data) free(img_data);
+        if (latest_img_data) free(latest_img_data);
         exit(EXIT_FAILURE)  ; 
     }
-
 }
 
 
@@ -597,15 +622,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                             }
                             else
                             {
-
-                                char file_err_msg[300];
-
-                                char* tmp =
+                                char file_err_msg[300] =
                                 "You should write a file name with a valid extension.\n"\
-                                "The accepted file extensions are .bmp, .jpeg or .jpg, and .png.\n"\
+                                "The accepted file extensions are .bmp, .jpeg or .jpg, and .png.\n\n"\
                                 "(Your input was: ";
                                 
-                                sprintf(file_err_msg, tmp, szFile);
+                                strcat(file_err_msg, szFile);                                
+                                strcat(file_err_msg, ")");
 
                                 MessageBox(hwnd, file_err_msg, "NG !", MB_OK);
                             }
