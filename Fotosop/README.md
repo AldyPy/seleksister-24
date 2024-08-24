@@ -13,7 +13,7 @@ I have made 2 programs. Choose the one that suits you.
 
 ### **GUI**:
 
-You can just watch this if you don't want to read the instructions (if it hasn't loaded wait 3 seconds).
+You can just watch this if you don't want to read the instructions. Click the GIF to watch from the beginning (if it hasn't loaded wait 3 seconds).
 
 ![](images/tutorial.gif)
 
