@@ -14,7 +14,7 @@ I have made 2 programs. Choose the one that suits you.
 ### **GUI**:
 
 You can just watch this if you don't want to read the instructions.
-![Image](https://s10.gifyu.com/images/Sompt.gif "FotosopGIF")
+![Image](images/tutorial.gif "FotosopGIF")
 
 **Instructions**
 1. Right after running the program, you are prompted to choose a file. The accepted file extensions are `.jpg`, `.jpeg`, `.png`, and `.bmp`.
