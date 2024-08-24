@@ -10,6 +10,7 @@
 #include <CL/cl.h>
 #include <commdlg.h>
 
+#define also 
 #define and &&
 #define but &&
 #define is ==
@@ -19,18 +20,14 @@
 
 unsigned char *img_data;
 unsigned char *latest_img_data;
-int image_width, image_height, image_channels;
+int image_width, image_height, image_channels; 
 int preview_width ;
 uint64_t image_size;
 char filename[100];
 
 
 /**
- * 
- * 
- * OpenCL business
- * 
- * 
+ *    OpenCL GPU Kernel source code
  */
 
 const char *kernel_source =                           "\
@@ -100,9 +97,9 @@ __kernel void filter(                                  \
     float C = S * V ;                                  \
     float m = (V - C);                                 \
     float Hmod2 = H;                                   \
-    if (Hmod2 > 6.0F) Hmod2 -= 6;                      \
-    if (Hmod2 > 4.0F) Hmod2 -= 4;                      \
-    if (Hmod2 > 2.0F) Hmod2 -= 2;                      \
+    if (Hmod2 >= 6.0F) Hmod2 -= 6;                     \
+    if (Hmod2 >= 4.0F) Hmod2 -= 4;                     \
+    if (Hmod2 >= 2.0F) Hmod2 -= 2;                     \
     float X ;                                          \
     if (Hmod2 - 1 > 0) X = C * (1 - (Hmod2 - 1)) ;     \
     else X = C * (1 - (1 - Hmod2)) ;                   \
@@ -157,12 +154,19 @@ void InitializeOpenCL();
 void CleanOpenCL();
 void CHECK_ERROR(cl_int err);
 
+uint8_t is_suffix(char* s, char* suf)
+{
+    size_t slen = strlen(s), suflen = strlen(suf);
+    if (slen < suflen) return 0;
+    for (int i = 0; i < suflen ; i++)
+        if (suf[suflen - i - 1] != s[slen - i - 1]) return 0;
+    
+    return 1;
+}
+
 void InitializeOpenCL()
 {
     printf("Initializing OpenCL...\n");
-    gray = -2;
-    contrast = -2.0F;
-    saturation = -2.0F;
     clGetPlatformIDs(1, &platform, NULL);
     clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -250,10 +254,6 @@ void FOTOSOP(BYTE* pixels)
 {
     memcpy(latest_img_data, img_data, image_size);
 
-    if (gray == -2) gray = 0;
-    if (contrast == -2.0F) contrast = 1.0F;
-    if (saturation == -2.0F) saturation = 1.0F;
-
     clSetKernelArg(colonel, 0, sizeof(cl_mem), &d_image);
     clSetKernelArg(colonel, 1, sizeof(int), &image_width);
     clSetKernelArg(colonel, 2, sizeof(int), &image_height);
@@ -277,15 +277,14 @@ void FOTOSOP(BYTE* pixels)
 }
 
 
-void LoadImageFromFile() {
-
+void LoadImageFromFile() 
+{
     printf("Loading image...\n");
 
-    if (img_data) stbi_image_free(img_data);
-
     img_data = stbi_load(filename, &image_width, &image_height, &image_channels, 0);
-    if (!img_data) {
-        MessageBox(NULL, "Failed to load image", "Error", MB_OK | MB_ICONERROR);
+    if (!img_data) 
+    {
+        MessageBox(NULL, "Uhh, I think there is something wrong with the image?", "Error", MB_OK | MB_ICONERROR);
         exit(0);
     }
     image_size = (uint64_t)image_height * (uint64_t)image_width * (uint64_t)image_channels;
@@ -295,6 +294,8 @@ void LoadImageFromFile() {
     printf("Done!\n");
 }
 
+#define PENCET_SAVE 101
+
 LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     static HBITMAP hBitmap = NULL;
@@ -303,8 +304,8 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     
     switch (msg) {
 
-        case WM_CREATE: {
-
+        case WM_CREATE: 
+        {
             window_height = image_height ;
             window_width = image_width ;
             
@@ -387,10 +388,12 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                     params[paramIdx][j++] = text[i];
             }
             gray = atoi(params[0]);
-            contrast = (float)atoi(params[1]) / 100;
-            saturation = (float)atoi(params[2]) / 100;
+            if (!params[1][0]) contrast = 1.0F;
+            else contrast = (float)atoi(params[1]) / 100;
+            if (!params[2][0]) saturation = 1.0F; 
+            else saturation = (float)atoi(params[2]) / 100;
 
-            if (gray != 0 and gray != 1) gray = 0;
+            if (gray isnt 0 but also gray isnt 1) gray = 0;
             if (contrast < 0.0F) contrast = 0.0F;
             if (contrast > 2.0F) contrast = 2.0F;
             
@@ -409,7 +412,8 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     return 0;
 }
 
-void CreatePreviewWindow(HINSTANCE hInstance) {
+void CreatePreviewWindow(HINSTANCE hInstance) 
+{
     WNDCLASS wc = {0};
 
     wc.lpfnWndProc = PreviewWndProc;
@@ -426,7 +430,7 @@ void CreatePreviewWindow(HINSTANCE hInstance) {
         wc.lpszClassName, "Image Preview",
         WS_SIZEBOX | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT,
-        preview_width, image_height, NULL, NULL, hInstance, NULL
+        image_width * 6/5, image_height* 6/5 , NULL, NULL, hInstance, NULL
     );
     
     ShowWindow(hwndPreview, SW_SHOW);
@@ -435,6 +439,8 @@ void CreatePreviewWindow(HINSTANCE hInstance) {
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
+
+    static HWND hButton;
     switch (msg) {
         case WM_CREATE: {
 
@@ -503,7 +509,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             int button_width = 100;
             y += 30;
 
-            HWND hButton = CreateWindowEx(
+            hButton = CreateWindowEx(
                 0,                             // Optional window styles
                 "BUTTON",                      // Predefined class for buttons
                 "Save image",                    // Button text
@@ -513,11 +519,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                 button_width,                           // Button width
                 button_height,                            // Button height
                 hwnd,                          // Parent window handle
-                (HMENU) BN_CLICKED,             // Control identifier
+                (HMENU) PENCET_SAVE,             // Control identifier
                 (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE),                     // Instance handle
                 NULL                           // Additional application data
             );
-
             
         } break;
 
@@ -525,47 +530,103 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             PostQuitMessage(0);
             break;
         
+
         case WM_COMMAND: {
             switch (HIWORD(wParam)) {
-                case BN_CLICKED: { /* Button press */
-
-                    OPENFILENAME ofn;       // Common dialog box structure
-                    char szFile[260];       // Buffer for file name
+                case BN_CLICKED : {
                     
-                    // Initialize OPENFILENAME
-                    ZeroMemory(&ofn, sizeof(ofn));
-                    ofn.lStructSize = sizeof(ofn);
-                    ofn.hwndOwner = hwnd;
-                    ofn.lpstrFile = szFile;
-                    ofn.lpstrFile[0] = '\0';   // Initialize file name buffer
-                    ofn.nMaxFile = sizeof(szFile);
-                    ofn.lpstrFilter = "All Files\0*.*\0JPEG Files\0*.JPG\0";
-                    ofn.nFilterIndex = 1;
-                    ofn.lpstrFileTitle = NULL;
-                    ofn.nMaxFileTitle = 0;
-                    ofn.lpstrInitialDir = NULL;
-                    ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+                    if (LOWORD(wParam) == PENCET_SAVE)
+                    {
 
-                    // Display the Save As dialog box
-                    if (GetSaveFileName(&ofn) == TRUE) {
-                        puts(szFile);
-                        //out, width, height, channels, image, width * channels
-                        stbi_write_jpg(szFile, 
-                            image_width, 
-                            image_height, 
-                            image_channels, 
-                            latest_img_data, 
-                            image_width * image_channels
-                        );
-                        stbi_image_free(img_data);
-                        stbi_image_free(latest_img_data);
+                        OPENFILENAME ofn;       // Common dialog box structure
+                        char szFile[260];       // Buffer for file name
+                        
+                        // Initialize OPENFILENAME
+                        ZeroMemory(&ofn, sizeof(ofn));
+                        ofn.lStructSize = sizeof(ofn);
+                        ofn.hwndOwner = hwnd;
+                        ofn.lpstrFile = szFile;
+                        ofn.lpstrFile[0] = '\0';   // Initialize file name buffer
+                        ofn.nMaxFile = sizeof(szFile);
+                        ofn.lpstrFilter = "All JPEG,PNG,BMP Files\0*.JPEG;*.JPG;*.PNG;*.BMP\0JPEG Files\0*.JPEG;*.JPG\0PNG Files\0*.PNG\0BMP Files\0*.bmp\0";
+                        ofn.nFilterIndex = 1;
+                        ofn.lpstrFileTitle = NULL;
+                        ofn.nMaxFileTitle = 0;
+                        ofn.lpstrInitialDir = NULL;
+                        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
-                        MessageBox(hwnd, "File saved successfully.", "OK !", MB_OK);
+                        // Display the Save As dialog box
+                        uint8_t SAVE_FILE_SUCCESS = 0;
+
+                        if (GetSaveFileName(&ofn) == TRUE) 
+                        {
+                            puts(szFile);
+                            if (is_suffix(szFile, ".bmp")) 
+                                stbi_write_bmp(   
+                                    szFile, 
+                                    image_width, 
+                                    image_height, 
+                                    image_channels, 
+                                    latest_img_data
+                                ), SAVE_FILE_SUCCESS = 1;
+                            
+                            if (is_suffix(szFile, ".jpg") || is_suffix(szFile, ".jpeg")) 
+                                stbi_write_jpg(   
+                                    szFile, 
+                                    image_width, 
+                                    image_height, 
+                                    image_channels, 
+                                    latest_img_data, 
+                                    image_width * image_channels
+                                ), SAVE_FILE_SUCCESS = 1;
+
+                            if (is_suffix(szFile, ".png"))
+                                stbi_write_png(
+                                    szFile, 
+                                    image_width, 
+                                    image_height, 
+                                    image_channels, 
+                                    latest_img_data, 
+                                    image_width * image_channels
+                                ), SAVE_FILE_SUCCESS = 1;
+                            
+                            if (SAVE_FILE_SUCCESS)
+                            {
+                                MessageBox(hwnd, "File saved successfully.", "OK !", MB_OK);
+                                PostQuitMessage(0);
+                            }
+                            else
+                            {
+
+                                char file_err_msg[300];
+
+                                char* tmp =
+                                "You should write a file name with a valid extension.\n"\
+                                "The accepted file extensions are .bmp, .jpeg or .jpg, and .png.\n"\
+                                "(Your input was: ";
+                                
+                                sprintf(file_err_msg, tmp, szFile);
+
+                                MessageBox(hwnd, file_err_msg, "NG !", MB_OK);
+                            }
+                        }
+                    }
+
+                    else if (LOWORD(wParam) == IDCANCEL) /* esc*/
+                    {
                         PostQuitMessage(0);
+                    }
+
+                    else if (LOWORD(wParam) == IDOK and GetFocus() == hButton) 
+                    {
+                        SendMessage(hwnd, WM_COMMAND, MAKEWPARAM(PENCET_SAVE, BN_CLICKED), (LPARAM)hButton);
                     }
 
                 }
                 break;
+
+
+
                 case EN_CHANGE: {
 
                     HWND hwndPreview = FindWindow("PreviewWindowClass", NULL);  // Find the big window by class name
@@ -632,12 +693,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ofn.lpstrFile = filename;
     ofn.lpstrFile[0] = '\0';   // Initialize file name buffer
     ofn.nMaxFile = sizeof(filename);
-    ofn.lpstrFilter = "JPEG Files\0*.JPEG;*.JPG\0All Files\0*.*\0PNG Files\0*.PNG\0";
+    ofn.lpstrFilter = "All JPEG,PNG,BMP Files\0*.JPEG;*.JPG;*.PNG;*.BMP\0JPEG Files\0*.JPEG;*.JPG\0PNG Files\0*.PNG\0BMP Files\0*.bmp\0";
     ofn.nFilterIndex = 1;
     ofn.lpstrFileTitle = NULL;
     ofn.nMaxFileTitle = 0;
     ofn.lpstrInitialDir = NULL;
-    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_READONLY;
+    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_READONLY ;
 
     if (!GetSaveFileName(&ofn)) exit(0);
     LoadImageFromFile();
@@ -652,14 +713,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     ShowWindow(hwndEdit, nCmdShow);
     SetForegroundWindow(hwndEdit);
+    SetWindowPos(hwndEdit, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 
     MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+    while (GetMessage(&msg, NULL, 0, 0)) 
+    {
+        if (!IsDialogMessage(hwndEdit, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 
     CleanOpenCL();
+    stbi_image_free(img_data);
+    stbi_image_free(latest_img_data);
     return (int) msg.wParam;
 }
