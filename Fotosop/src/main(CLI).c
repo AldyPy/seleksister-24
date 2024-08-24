@@ -58,7 +58,8 @@ void CHECK_ERROR(cl_int err)
 {
     if (err isnt CL_SUCCESS) 
     { 
-        fprintf(stderr, "OpenCL Error: %d\n", err)  ; 
+        fprintf(stderr, "OpenCL Error. Code: %d\n", err)  ; 
+        free(image);
         exit(EXIT_FAILURE)  ; 
     }
 }
@@ -67,6 +68,8 @@ void CHECK_ERROR(cl_int err)
 #include "stblib/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stblib/stb_image_write.h"
+uint8_t* image;
+
 
 const char *kernel_source =                           "\
                                                        \
@@ -241,7 +244,7 @@ int main()
     
     printf("Loading image... \n") ;
     int width, height, channels;
-    uint8_t *image = stbi_load(tokens[0], &width, &height, &channels, 0);
+    image = stbi_load(tokens[0], &width, &height, &channels, 0);
 
     if (!image) 
     {
@@ -259,9 +262,21 @@ int main()
     cl_int err;
     cl_platform_id platform;
     clGetPlatformIDs(1, &platform, NULL);
-
+    CHECK_ERROR(err);
+    if (err) 
+    {
+        puts("No OpenCL platform found. Please install an OpenCL runtime for your graphics drivers.");
+        goto clean;
+    }
+    
     cl_device_id device;
     clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
+    if (err) 
+    {
+        puts("No OpenCL GPU device found. Sorry :(");
+        goto clean;
+    }
+
     cl_context context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
     cl_command_queue queue = clCreateCommandQueue(context, device, 0, &err);
     cl_mem d_image = clCreateBuffer(context, CL_MEM_READ_WRITE, image_size, NULL, &err);
