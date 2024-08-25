@@ -7,7 +7,17 @@ A simple program to modify the contrast and saturation of an image, as well as a
 ## How To Run
 I have made 2 programs. Choose the one that suits you.
 1. **GUI**: click and open the executable `Fotosop.exe`. **This is Windows only.**
-2. **Command line:** For windows, run the executable `Fotosop(CLI).exe`. For Unix, run `Fotosop`.
+2. **Command line:** depending on OS,
+- For **Windows**, run the executable `Fotosop(CLI).exe`.
+- For **Unix**, run `Fotosop`. 
+
+If you are on **MacOS,** unfortunately **I did not prepare an executable, sorry**. You can, however, compile [mainCLI.c](src/mainCLI.c) (located in `src` folder) with the following flags for gcc:
+
+```
+gcc "mainCLI.c" -o Fotosop -lm -lOpenCL -Wno-deprecated-declarations
+```
+
+There is no other dependencies and MacOS should already support OpenCL, so the above command should _probably_ work.
 
 ## How To Use
 
