@@ -1,5 +1,5 @@
 # Fotosop
-*"The fastest pixel processor in the west..."*
+>_**"The fastest pixel processor in the west..."**_
 
 ## About
 A simple program to modify the contrast and saturation of an image, as well as apply a greyscale filter. The program uses the [OpenCL library](https://github.com/KhronosGroup/OpenCL-SDK) for GPU processing and the [stb library](https://github.com/nothings/stb) for image processing.
