@@ -1,6 +1,6 @@
 
 
-<b><i><h1 style="text-align: center;"> Latar Belakang </h1></b></i>
+<b><i><h1 align="center"> Latar Belakang </h1></b></i>
 
 Anda sedang asik mempelajari Bahasa [pythOwO](https://virejdasani.github.io/pythOwO/). Anda sedang membuat program pertama Anda.
 
