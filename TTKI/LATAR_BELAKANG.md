@@ -20,7 +20,6 @@ Rupanya Anda mengenal suara ini. Anda merasa tidak asing dengannya. Anda membali
 <p align="center">
   <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/6de63322-3f5f-4811-9bce-2f2e7c52ce2e/dexdb2l-9ee8a25d-6c37-47e2-b453-b98f7980e4e9.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzZkZTYzMzIyLTNmNWYtNDgxMS05YmNlLTJmMmU3YzUyY2UyZVwvZGV4ZGIybC05ZWU4YTI1ZC02YzM3LTQ3ZTItYjQ1My1iOThmNzk4MGU0ZTkucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.RRoutYYcrzGZR81n-jSGu5SiwGte2_f7o5AONT8h1PM" alt="Description">
 </p>
-
 <p align="center"><i>(Project Sekai<sup>TM</sup> <a href="https://projectsekai.fandom.com/wiki/Happy_Anniversary!!_(Len)";>official art</a>, PNG edit by: <a href="https://www.deviantart.com/platlia/art/Kagamine-Len-Render-Vocaloid-Project-Sekai-902574669";>PlatLia</a>)</i>
 </p>
 
@@ -53,8 +52,6 @@ Hah?? SAKIT?!!
   <img src="https://c4.wallpaperflare.com/wallpaper/1022/308/990/hatsune-miku-append-closed-eyes-anime-girls-hatsune-miku-wallpaper-preview.jpg" alt="Description">
 </p>
 <p align="center">(Original art by: <a href="https://www.pixiv.net/en/artworks/10652664";>オサム</a>)</p>
-
-<br>
 
 Innalillahi Wa Inna Ilaihi Rajiun... apakah ini yang dimakusd [_初音ミクの消失_](https://www.youtube.com/watch?v=VWVtIg5cdDU) (Hilangnya Matsune Hiku)?
 
