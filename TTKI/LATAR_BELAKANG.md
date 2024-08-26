@@ -96,3 +96,4 @@ fin.
 > The above is a **non-profit fanmade parody**, created for the sole purpose of completing an assignment in a privately held selection in an educational institution. Hatsune Miku as well as Kagamine Len are owned by Crypton Future Media INC., who is not associated with the author of this work. As such, the narative context of this work does not represent or reflect the nature of any official products or releases.
 
 > All external materials that do not belong to the author that are used in this work have been properly linked and credited. Please support the original artists.
+
