@@ -1,3 +1,2 @@
 # Tulis Tulis Karya Ilmiah
-_"Let me cook."_
-
+> _**"Let me cook."**_
