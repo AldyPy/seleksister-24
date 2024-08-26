@@ -236,7 +236,8 @@ void CHECK_ERROR(cl_int err)
  *      b.) When I tried to do that, My laptop black screened for 5 seconds, 
  *          which restarted the display
  *      c.) I ain't no Windows/OpenCL dev, so hell nah I ain't debuggin that shi
- *      d.) Nevermind, I solved it. If I haven't changed this it's because of point a.) (and I'm lazy)
+ *      d.) Nevermind, I solved it. If I haven't changed this it's because of point a.)
+ *          (and also the processing is still done on GPU, this is just memory manipulation)
  *          
  * @param pixels: the pointer to DI Bitmap bits.
  */
