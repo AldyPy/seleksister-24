@@ -9,7 +9,6 @@
 #define CL_TARGET_OPENCL_VERSION 300
 #include <CL/cl.h>
 #include <commdlg.h>
-#include "r.rc"
 
 #define also 
 #define and &&
@@ -237,7 +236,8 @@ void CHECK_ERROR(cl_int err)
  *      b.) When I tried to do that, My laptop black screened for 5 seconds, 
  *          which restarted the display
  *      c.) I ain't no Windows/OpenCL dev, so hell nah I ain't debuggin that shi
- *      d.) Nevermind, I solved it. If I haven't changed this it's because of point a.) (and I'm lazy)
+ *      d.) Nevermind, I solved it. If I haven't changed this it's because of point a.)
+ *          (and also the processing is still done on GPU, this is just memory manipulation)
  *          
  * @param pixels: the pointer to DI Bitmap bits.
  */
@@ -271,7 +271,7 @@ void CpyImgToBMAP(BYTE* bmpixels)
  * Re-copies img_data to latest_img_data, then on that data,
  * performs parallel execution of:
  *      1. Process each pixel based on gray, contrast, saturation params.
- *      2. Modifies each pixel data of img_data in place.
+ *      2. Modifies each pixel data of latest_img_data in place.
  * 
  * @param pixels: the pointer to DI Bitmap bits.
  */
@@ -334,11 +334,9 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             window_height = image_height ;
             window_width = image_width ;
             
-            // Create a compatible DC
+            // Initialize bitmap used for display
             HDC hdc = GetDC(hwnd);
             HDC hdcMem = CreateCompatibleDC(hdc);
-
-            // Create a BITMAPINFO structure
             BITMAPINFO bmi = {0};
             bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
             bmi.bmiHeader.biWidth = preview_width;
@@ -357,7 +355,6 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
                 return -1;
             }
 
-            // Cleanup
             ReleaseDC(hwnd, hdc);
             DeleteDC(hdcMem);
         }
@@ -366,32 +363,28 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
         case WM_SIZE :
             window_width = LOWORD(lParam);
             window_height = HIWORD(lParam);
-            InvalidateRect(hwnd, NULL, TRUE); // Trigger a repaint
+            InvalidateRect(hwnd, NULL, TRUE);
             break;
 
         case WM_DESTROY:
-            DeleteObject(hBitmap); // Delete the bitmap
-            PostQuitMessage(0); // Exit application
+            DeleteObject(hBitmap);
+            PostQuitMessage(0);
             break;
 
         case WM_PAINT: {
+
+            // paint
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-
             CpyImgToBMAP(pixels);
-
-            // Create a compatible DC and select the bitmap
             HDC hdcMem = CreateCompatibleDC(hdc);
             HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
-
-            // BitBlt to copy the image from memory DC to window DC
             BITMAP bitmap;
-            GetObject(hBitmap, sizeof(bitmap), &bitmap); // Get bitmap info
-
+            GetObject(hBitmap, sizeof(bitmap), &bitmap); 
             StretchBlt(hdc, 0, 0, window_width, window_height, hdcMem, 
             0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
 
-            // Cleanup
+            // clean
             SelectObject(hdcMem, hOldBitmap);
             DeleteDC(hdcMem);
             EndPaint(hwnd, &ps);
@@ -403,6 +396,7 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             LPCSTR text = (LPCSTR)lParam;
             // puts(text);
 
+            // gets and parses the params from the textboxes
             char params[3][100];
             int i, paramIdx = 0, j = 0;
             for (i = 0; text[i]; i++)
@@ -418,14 +412,16 @@ LRESULT CALLBACK PreviewWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
             if (!params[2][0]) saturation = 1.0F; 
             else saturation = (float)atoi(params[2]) / 100;
 
+            // if gray isn't 0 but also gray isn't 1, set gray to 0
             if (gray isnt 0 but also gray isnt 1) gray = 0;
+            
             if (contrast < 0.0F) contrast = 0.0F;
             if (contrast > 2.0F) contrast = 2.0F;
             
             if (saturation < 0.0F) saturation = 0.0F;
             if (saturation > 2.0F) saturation = 2.0F;
 
-            // redraw bitmap
+            // FOTOSOP a.k.a. recalculate latest_img_data, then redraw bitmap
             FOTOSOP(pixels);
             InvalidateRect(hwnd, NULL, TRUE);
         }
@@ -456,7 +452,7 @@ void CreatePreviewWindow(HINSTANCE hInstance)
         WS_SIZEBOX | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT,
         image_width * 6/5, image_height* 6/5 , NULL, NULL, hInstance, NULL
-    );
+    ); // here for some reason, setting the window to *exactly* the image size still causes tearing, which is why I gave it a 6/5 multiplier
     
     ShowWindow(hwndPreview, SW_SHOW);
     UpdateWindow(hwndPreview);
@@ -491,8 +487,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 
             int offset = 60;
-            int width = 80;  // Width of each text box
-            int height = 20;  // Height of each text box
+            int width = 80;            // Width of each text box
+            int height = 20;          // Height of each text box
             int x = center-(width/2) + offset;  // Center horizontally
             int y = 125;  // Starting y position
             int promptWidth = 135;
@@ -535,23 +531,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             y += 50;
 
             hButton = CreateWindowEx(
-                0,                             // Optional window styles
-                "BUTTON",                      // Predefined class for buttons
-                "Save image",                    // Button text
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles
-                center - button_width/2,                            // x position
-                y,                           // y position
-                button_width,                           // Button width
-                button_height,                            // Button height
-                hwnd,                          // Parent window handle
-                (HMENU) PENCET_SAVE,             // Control identifier
-                (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE),                     // Instance handle
-                NULL                           // Additional application data
+                0,
+                "BUTTON",
+                "Save image",
+                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+                center - button_width/2,     // x position
+                y,                          // y position
+                button_width,
+                button_height,
+                hwnd,
+                (HMENU) PENCET_SAVE,
+                (HINSTANCE) GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+                NULL
             );
             
         } break;
 
-        case WM_CTLCOLORSTATIC:
+        case WM_CTLCOLORSTATIC: /* To remove ugly gray box in prompt text */
         {
             HDC hdcStatic = (HDC)wParam;
             SetBkMode(hdcStatic, TRANSPARENT);
@@ -569,15 +565,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     if (LOWORD(wParam) == PENCET_SAVE)
                     {
 
-                        OPENFILENAME ofn;       // Common dialog box structure
-                        char szFile[260];       // Buffer for file name
-                        
-                        // Initialize OPENFILENAME
+                        /* Save file routine */
+                        OPENFILENAME ofn;
+                        char szFile[260];
                         ZeroMemory(&ofn, sizeof(ofn));
                         ofn.lStructSize = sizeof(ofn);
                         ofn.hwndOwner = hwnd;
                         ofn.lpstrFile = szFile;
-                        ofn.lpstrFile[0] = '\0';   // Initialize file name buffer
+                        ofn.lpstrFile[0] = '\0';
                         ofn.nMaxFile = sizeof(szFile);
                         ofn.lpstrFilter = "All JPEG,PNG,BMP Files\0*.JPEG;*.JPG;*.PNG;*.BMP\0JPEG Files\0*.JPEG;*.JPG\0PNG Files\0*.PNG\0BMP Files\0*.bmp\0";
                         ofn.nFilterIndex = 1;
@@ -585,9 +580,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                         ofn.nMaxFileTitle = 0;
                         ofn.lpstrInitialDir = NULL;
                         ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-
-                        // Display the Save As dialog box
                         uint8_t SAVE_FILE_SUCCESS = 0;
+
 
                         if (GetSaveFileName(&ofn) == TRUE) 
                         {
@@ -658,22 +652,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
                 case EN_CHANGE: {
 
-                    HWND hwndPreview = FindWindow("PreviewWindowClass", NULL);  // Find the big window by class name
-                    // Get the handle of the text boxes
+                    HWND hwndPreview = FindWindow("PreviewWindowClass", NULL);
+
                     HWND hEdit1 = GetDlgItem(hwnd, 1);
                     HWND hEdit2 = GetDlgItem(hwnd, 2);
                     HWND hEdit3 = GetDlgItem(hwnd, 3);
 
-                    // Buffer to store text
                     char buffer1[256], buffer2[256], buffer3[256];
 
-                    // Retrieve the text from each text box
                     GetWindowText(hEdit1, buffer1, sizeof(buffer1));
                     GetWindowText(hEdit2, buffer2, sizeof(buffer2));
                     GetWindowText(hEdit3, buffer3, sizeof(buffer3));
 
-                    // Combine the texts into one string or use separate messages
-                    char combinedText[768];  // Adjust size if needed
+                    char combinedText[768];
                     snprintf(combinedText, sizeof(combinedText), "%s\n%s\n%s",
                             buffer1, buffer2, buffer3);
 
@@ -695,7 +686,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     WNDCLASS wc = {0};
-    wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(102));
 
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInstance;
@@ -713,15 +703,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     );
 
 
-    OPENFILENAME ofn;
     MessageBox(NULL, "Select an image.", "Welcome!", MB_OK);
 
-    // Initialize OPENFILENAME
+    /* Open file routine */
+    OPENFILENAME ofn;
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = NULL;
     ofn.lpstrFile = filename;
-    ofn.lpstrFile[0] = '\0';   // Initialize file name buffer
+    ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(filename);
     ofn.lpstrFilter = "All JPEG,PNG,BMP Files\0*.JPEG;*.JPG;*.PNG;*.BMP\0JPEG Files\0*.JPEG;*.JPG\0PNG Files\0*.PNG\0BMP Files\0*.bmp\0";
     ofn.nFilterIndex = 1;
@@ -756,6 +746,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
     }
 
+    // nyapu dan ngepel
     CleanOpenCL();
     stbi_image_free(img_data);
     stbi_image_free(latest_img_data);

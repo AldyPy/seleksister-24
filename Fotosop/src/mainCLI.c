@@ -3,6 +3,12 @@
 #include <string.h>
 #include <stdint.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stblib/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stblib/stb_image_write.h"
+uint8_t* image;
+
 #define and &&
 #define but &&
 #define is ==
@@ -63,12 +69,6 @@ void CHECK_ERROR(cl_int err)
         exit(EXIT_FAILURE)  ; 
     }
 }
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stblib/stb_image.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stblib/stb_image_write.h"
-uint8_t* image;
 
 
 const char *kernel_source =                           "\
@@ -403,29 +403,29 @@ int main()
     else if (token_count == 1)
     {
         strcpy(out, tokens[0]);
-
-        if (is_suffix(tokens[0], ".png"))
-        {
-            printf("Saving and cleaning up...\n") ;
-            stbi_write_png(out, width, height, channels, image, width * channels);
-        }
-        else if (is_suffix(tokens[0], ".jpeg") || is_suffix(tokens[0], ".jpg"))
-        {
-            printf("Saving and cleaning up...\n") ;
-            stbi_write_jpg(out, width, height, channels, image, width * channels);
-        }
-        else if (is_suffix(tokens[0], ".bmp"))
-        {
-            printf("Saving and cleaning up...\n") ;
-            stbi_write_bmp(out, width, height, channels, image);
-        }
-        else
-        {
-            WHITE printf("Error. Please enter a filename ending in \".png\", \".jpeg\", \".jpg\", or \".bmp\": ") ; RESET;
-            goto save_loop;
-        }
-
     }
+
+    if (is_suffix(out, ".png"))
+    {
+        printf("Saving and cleaning up...\n") ;
+        stbi_write_png(out, width, height, channels, image, width * channels);
+    }
+    else if (is_suffix(out, ".jpeg") || is_suffix(out, ".jpg"))
+    {
+        printf("Saving and cleaning up...\n") ;
+        stbi_write_jpg(out, width, height, channels, image, width * channels);
+    }
+    else if (is_suffix(out, ".bmp"))
+    {
+        printf("Saving and cleaning up...\n") ;
+        stbi_write_bmp(out, width, height, channels, image);
+    }
+    else
+    {
+        WHITE printf("Error. Please enter a filename ending in \".png\", \".jpeg\", \".jpg\", or \".bmp\": ") ; RESET;
+        goto save_loop;
+    }
+
 
     clean:
     stbi_image_free(image);

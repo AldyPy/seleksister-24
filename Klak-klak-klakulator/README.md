@@ -1,5 +1,5 @@
 # Klakulator
-*"To reinvent the world, one wheel at a time..."*
+>_**"To reinvent the world, one wheel at a time..."**_
 
 ## About
 A simple calculator that implements addition `+`, subtraction `-`, multiplication `*`, division `/`, integer exponents `^`, as well as square root `sqrt()` calculations, purely using bitwise operators, array functions, and string functions. There are also no for loops or while loops. The main idea of the implementation is to represent any real number as two arrays of single digit numbers: the whole part, and the fractional part.
