@@ -62,11 +62,6 @@ sub evaluate
     
     eval 
     {   
-        # if (substr($expr, 0, 1) eq '-')
-        # {
-        #     $i = _inc($i) ;
-        #     $current_number = '-';
-        # }
 
         inp :
 
@@ -74,14 +69,14 @@ sub evaluate
             
             $ch = substr($expr, $i, 1) ;
             $i = _inc($i) ;
-            if ($ch eq ' ') { goto inp }
-            elsif ((_to_int($ch) <= 9 && _to_int($ch) >= 0) || $ch eq '.') 
+            if ((_to_int($ch) <= 9 && _to_int($ch) >= 0) || $ch eq '.') 
             {
                 $current_number = $current_number . $ch ;
             }
             else
             {
                 if ($ch eq '-' and $current_number eq '') {$current_number = '-'}
+                elsif ($ch eq '-' and $current_number eq '-') {$current_number = ''}
                 elsif ($current_number eq '') { die }
                 else 
                 {
