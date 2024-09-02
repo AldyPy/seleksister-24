@@ -24,9 +24,7 @@ There is no other dependencies and MacOS should already support OpenCL, so the a
 
 ### **GUI**:
 
-You can just watch this if you don't want to read the instructions. Click the GIF to watch from the beginning (if it hasn't loaded wait 3 seconds).
-
-![](images/tutorial.gif)
+You can watch [this one minute video](https://www.youtube.com/watch?v=PssefjWBZFI) of me demo-ing the program to see how it's used. You can also read the following instructions.
 
 **Instructions**
 
