@@ -127,11 +127,7 @@ sub evaluate
                     $numerator = exponent($numerator, $N) ;
                     $denominator = exponent($denominator, $Ncopy) ;
                 }
-
-                print $numerator->to_str();
-                print "\n";
-                print $denominator->to_str();
-                print "\n";
+                
                 goto calculate ;
             }
 
