@@ -146,6 +146,8 @@ mainloop :
         my $ch ;
         print "${White}>>>  "   ;
         my $expr = <STDIN>      ;
+        if ($expr eq "\n") {goto mainloop}
+
         $expr = remove_whitespace($expr) ;
         if ($expr eq "exit") { print $reset ; exit}
         if (($expr eq "UUDDLRLRBASTART") or ($expr eq "sctoggle")) 
