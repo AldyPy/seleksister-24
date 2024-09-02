@@ -1,4 +1,4 @@
-# Seleksister-24
+# Tugas Seleksi Bagian B Laboratorium Sistem Terdistribusi 2024
 
 ## Identitas
 |NAMA|NIM|
