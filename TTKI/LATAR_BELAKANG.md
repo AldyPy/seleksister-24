@@ -65,7 +65,7 @@ Segmentation fault adalah _bug_ yang cukup sulit diperbaiki. Dengan tubuh yang m
 <i><h3>"Saya ini bukan siapa-siapa!"</h3></i>
 
 <i><h4 align="right">"Hoo, kamu tidak perlu rendah diri!"</h4></i>
-<i><h4 align="right">"Aku sudah melihat program PythOwO yang kau buat. Di samping itu, kamu adalah mahasiswa IF! Buatmu, lautan ujian pasti sudahlah biasa!</h4></i>
+<i><h4 align="right">"Aku sudah melihat program PythOwO yang kau buat. Di samping itu, kamu adalah mahasiswa IF/STI! Buatmu, lautan ujian pasti sudahlah biasa!</h4></i>
 <h4 align="right"><i>Dengan bantuanmu, aku yakin Hiku bisa disembuhkan!"</h4></i>
 
 <i><h3>"T-t-tapi..!!"</h3></i>
