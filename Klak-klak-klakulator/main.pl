@@ -123,10 +123,15 @@ sub evaluate
                 elsif ($ch eq '^')
                 {
                     my $N = pop(@nums) ;
+                    my $Ncopy = Number->new($N->to_str()) ;
                     $numerator = exponent($numerator, $N) ;
-                    $denominator = exponent($denominator, $N) ;
+                    $denominator = exponent($denominator, $Ncopy) ;
                 }
 
+                print $numerator->to_str();
+                print "\n";
+                print $denominator->to_str();
+                print "\n";
                 goto calculate ;
             }
 
