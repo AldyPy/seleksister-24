@@ -1,5 +1,6 @@
 # Klakulator
->_**"To reinvent the world, one wheel at a time..."**_
+
+![](meme.png)
 
 ## About
 A simple calculator that implements addition `+`, subtraction `-`, multiplication `*`, division `/`, integer exponents `^`, as well as square root `sqrt()` calculations, purely using bitwise operators, array functions, and string functions. There are also no for loops or while loops. The main idea of the implementation is to represent any real number as two arrays of single digit numbers: the whole part, and the fractional part.
@@ -105,9 +106,3 @@ I had to allow *this* :
 Note that the actual result is `1.000000009`. That is a difference of less than `10e-7` which is less than a `0.000000000001%` error with respect to the original operands' magnitudes. Unless this calculator is going to be used for intergalactic space travel, I'd say you can trust it.
 
 3. I have never used Perl before so the code is quite unreadable.
-
-## Author
-
-|NAMA|NIM|
-|-|-|
-|Renaldy Arief Susanto|13522022|

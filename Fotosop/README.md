@@ -1,5 +1,6 @@
 # Fotosop
->_**"The fastest pixel processor in the west..."**_
+
+![](meme.png)
 
 ## About
 A simple program to modify the contrast and saturation of an image, as well as apply a greyscale filter. The program uses the [OpenCL library](https://github.com/KhronosGroup/OpenCL-SDK) for GPU processing and the [stb library](https://github.com/nothings/stb) for image processing.
@@ -97,9 +98,3 @@ You can see above there are some weird blue specs sorrounding the light near the
 You can see the resulting image is clean. 
 
 I think that this is  due to how Windows' `StretchBlt` function handles the image as it resizes, but without using that, the image couldn't be dynamically resized. It means that for very large images, you could only see the top left part. Unless your monitor is 4k, that is. This is obviously a large problem (hehe pun intended) so I thought `StretchBlt` was okay at the cost of a few slightly weird colors (instead of spending more time to  find another way to do it).
-
-## Author
-
-|NAMA|NIM|
-|-|-|
-|Renaldy Arief Susanto|13522022|
