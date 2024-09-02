@@ -44,7 +44,7 @@ sub remove_whitespace
             goto rmwhitesp ;
         }
     
-    return substr($s, 0, $j - 1) ;
+    return substr($s, 0, _sub_int($j, 1)) ;
 }
 
 

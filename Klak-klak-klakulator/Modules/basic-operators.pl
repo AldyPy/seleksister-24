@@ -30,7 +30,7 @@ sub _inc
 }
 
 sub _add_int
-# WRITTEN BY @dragonfly02 at StackOverflow
+# ORIGINALly BY @dragonfly02 at StackOverflow
 # https://stackoverflow.com/a/26256440
 {
     my ($a, $b) = @_ ;
